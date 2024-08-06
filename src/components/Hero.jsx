@@ -28,14 +28,14 @@ const Hero = () => {
               className="w-full h-auto rounded-md shadow-lg"
             />
             <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-b from-transparent to-blue-800 opacity-25 rounded-md"></div>
-            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-white rounded-full border-4 border-dashed border-gray-200 overflow-hidden">
+            <div className="absolute -bottom-10 -right-10 hidden sm:w-64 sm:h-64 bg-white rounded-full border-4 border-dashed border-gray-200 overflow-hidden">
               <img
                 src={city} // Replace with your image URL
                 alt="Circle"
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="absolute -bottom-20 -left-10 w-32 h-32 bg-white rounded-full border-4 border-dashed border-gray-200 overflow-hidden">
+            <div className="absolute -bottom-20 -left-10 hidden sm:w-32 sm:h-32 bg-white rounded-full border-4 border-dashed border-gray-200 overflow-hidden">
               <img
                 src={city} // Replace with your image URL
                 alt="Small Circle"

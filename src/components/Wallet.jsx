@@ -18,11 +18,14 @@ const Wallet = () => {
       console.error('Error connecting wallet:', error.message);
     }
   };
+  const disconnect = () => {
+    setConnectedAddress(null)
+  }
 
   return (
     <div>
       {connectedAddress ? (
-        <p>Connected Wallet: {connectedAddress}</p>
+        <p onClick={disconnect} className='px-4 py-2 cursor-pointer'>Connected Wallet: {connectedAddress}</p>
       ) : (
         <button
           onClick={handleConnectWallet}

@@ -42,31 +42,10 @@ const Header = () => {
 
       {mobileMenuOpen && (
         <div className="bg-blue-800 py-4 sm:hidden">
-          <Link
-            to="/"
-            className={`block text-center py-2 ${
-              activeTab === '/' && 'text-blue-200 font-semibold'
-            }`}
-            onClick={() => {
-              setActiveTab('Home');
-              setMobileMenuOpen(false);
-            }}
-          >
-            Home
-          </Link>
-          <Link
-            to="/search"
-            className={`block text-center py-2 ${
-              activeTab === '/search' && 'text-blue-200 font-semibold'
-            }`}
-            onClick={() => {
-              setActiveTab('search');
-              setMobileMenuOpen(false);
-            }}
-          >
-            Search
-          </Link>
-          <Wallet/>
+          <div className='flex flex-1 items-center justify-center'>
+            <Wallet/>
+
+          </div>
 
         </div>
       )}
