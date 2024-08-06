@@ -88,21 +88,8 @@ const Header = () => {
           >
             Search
           </Link>
-          <Link
-            to="/registerland"
-            className={`block text-center py-2 ${
-              activeTab === '/registerland' && 'text-blue-200 font-semibold'
-            }`}
-            onClick={() => {
-              setActiveTab('registerland');
-              setMobileMenuOpen(false);
-            }}
-          >
-            Register Land
-          </Link>
-          <div className='block text-center py-2 mx-auto'>
-            <Dropdown />
-          </div>
+          <Wallet/>
+
         </div>
       )}
     </div>
