@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Dropdown from './ui/Dropdown';
+import Wallet from './Wallet';
 
 const Header = () => {
   const [activeTab, setActiveTab] = useState('Home');
@@ -23,7 +24,7 @@ const Header = () => {
             <h1 className=" text-white font-bold">Regisry</h1>
           </Link>
 
-          <div className="hidden sm:flex justify-between items-center w-[50%] lg:w-[30%]">
+          <div className="hidden sm:flex justify-between items-center w-[40%] lg:w-[25%]">
             <Link
               to="/"
               className={`hover:text-blue-200 ${
@@ -46,17 +47,8 @@ const Header = () => {
               <button className="text-white">Search</button>
             </Link>
 
-            <Link
-              to="/registerland"
-              className={`hover:text-blue-200 ${
-                activeTab === '/registerland' &&
-                'border-b-2 border-blue-200 text-blue-200 font-semibold'
-              }`}
-              onClick={() => setActiveTab('registerland')}
-            >
-              <h1 className="text-white">Register Land</h1>
-            </Link>
-            <Dropdown />
+
+            <Wallet/>
           </div>
 
           <div className="sm:hidden">
