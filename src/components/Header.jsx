@@ -1,16 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import Dropdown from './ui/Dropdown';
+import React, { useState, } from 'react';
+import { Link } from 'react-router-dom';
 import Wallet from './Wallet';
 
 const Header = () => {
-  const [activeTab, setActiveTab] = useState('Home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const location = useLocation();
 
-  useEffect(() => {
-    setActiveTab(location.pathname);
-  }, [location]);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
