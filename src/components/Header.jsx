@@ -24,29 +24,7 @@ const Header = () => {
             <h1 className=" text-white font-bold">Regisry</h1>
           </Link>
 
-          <div className="hidden sm:flex justify-between items-center w-[40%] lg:w-[25%]">
-            <Link
-              to="/"
-              className={`hover:text-blue-200 ${
-                activeTab === '/' &&
-                'border-b-2 border-blue-200 text-blue-200 font-semibold'
-              }`}
-              onClick={() => setActiveTab('Home')}
-            >
-              <h1 className="text-white">Home</h1>
-            </Link>
-
-            <Link
-              to="/search"
-              className={`hover:text-blue-200 ${
-                activeTab === '/search' &&
-                'border-b-2 text-blue-200 font-semibold'
-              }`}
-              onClick={() => setActiveTab('search')}
-            >
-              <button className="text-white">Search</button>
-            </Link>
-
+          <div className="hidden sm:flex">
 
             <Wallet/>
           </div>
