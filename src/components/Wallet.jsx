@@ -1,35 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Web3 from 'web3';
 
 const Wallet = () => {
-  const [connectedAddress, setConnectedAddress] = useState(null);
+  const [account, setAccount] = useState('');
 
-  const handleConnectWallet = async () => {
-    try {
-      if (typeof window.ethereum !== 'undefined') {
-        // Request accounts from MetaMask
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-        // Set the connected address
-        setConnectedAddress(accounts[0]);
+  useEffect(() => {
+    const loadWeb3 = async () => {
+      if (window.ethereum) {
+        try {
+          const web3 = new Web3(window.ethereum);
+          await window.ethereum.request({ method: 'eth_requestAccounts' }); // Request accounts access
+          const accounts = await web3.eth.getAccounts();
+          setAccount(accounts[0]); // Set the first account
+        } catch (error) {
+          console.error("User denied account access");
+        }
+      } else if (window.web3) {
+        const web3 = new Web3(window.web3.currentProvider);
+        const accounts = await web3.eth.getAccounts();
+        setAccount(accounts[0]);
       } else {
-        alert('Please install MetaMask to connect your wallet.');
+        console.error("Non-Ethereum browser detected. Please install MetaMask!");
       }
-    } catch (error) {
-      console.error('Error connecting wallet:', error.message);
-    }
-  };
-  const disconnect = () => {
-    setConnectedAddress(null)
-  }
+    };
+
+    loadWeb3();
+  }, []);
 
   return (
     <div>
-      {connectedAddress ? (
-        <p onClick={disconnect} className='px-4 py-2 cursor-pointer'>Connected Wallet: {connectedAddress}</p>
+      {account ? (
+        <button className="bg-green-500 text-white px-4 py-2 rounded">
+          Connected: {account.substring(0, 6)}...{account.substring(account.length - 4)}
+        </button>
       ) : (
         <button
-          onClick={handleConnectWallet}
-          className="bg-white hover:bg-gray-200 text-blue-800 px-4 py-2 rounded-2xl"
+          onClick={() => window.ethereum.request({ method: 'eth_requestAccounts' })}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
         >
           Connect Wallet
         </button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import {ABI} from '../AddressABI/ABI'; // ABI file
+import { ABI } from '../AddressABI/ABI'; // ABI file
 import { contractAddress } from '../AddressABI/contractAddress'; // Contract address
 import Header from '../components/Header';
 
@@ -10,8 +10,11 @@ function RegisterLand() {
   const [location, setLocation] = useState('');
   const [size, setSize] = useState('');
   const [documentHash, setDocumentHash] = useState('');
+  const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // Load blockchain data
   useEffect(() => {
     const loadBlockchainData = async () => {
       if (window.ethereum) {
@@ -25,16 +28,10 @@ function RegisterLand() {
           setLandRegistry(contract);
         } catch (error) {
           console.error('User denied account access or error:', error);
+          setErrorMessage('Failed to connect wallet. Please try again.');
         }
-      } else if (window.web3) {
-        const web3 = new Web3(window.web3.currentProvider);
-        const accounts = await web3.eth.getAccounts();
-        setAccount(accounts[0]);
-
-        const contract = new web3.eth.Contract(ABI, contractAddress);
-        setLandRegistry(contract);
       } else {
-        window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
+        alert('Please install MetaMask to use this feature.');
       }
     };
 
@@ -43,24 +40,41 @@ function RegisterLand() {
 
   const handleRegisterLand = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    // Input validation
+    if (!location || !size || !documentHash) {
+      setErrorMessage('Please fill in all fields.');
+      return;
+    }
+
     if (landRegistry) {
       try {
+        setLoading(true); // Start loading
         await landRegistry.methods.registerLand(location, size, documentHash).send({ from: account });
         setSuccessMessage('Land registered successfully!');
         setLocation('');
         setSize('');
         setDocumentHash('');
+
+        // Clear success message after a delay
+        setTimeout(() => {
+          setSuccessMessage('');
+        }, 5000);
       } catch (err) {
         console.error('Error registering land:', err);
-        setSuccessMessage('Failed to register land.');
+        setErrorMessage('Failed to register land. Please try again.');
+      } finally {
+        setLoading(false); // Stop loading
       }
     }
   };
 
   return (
-      <div className="min-h-screen bg-gray-100 ">
-      <Header/>
-      <div className='flex items-center mt-10 justify-center'>
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <div className="flex items-center mt-10 justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
           <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Register Land</h2>
           <form onSubmit={handleRegisterLand} className="space-y-4">
@@ -100,18 +114,22 @@ function RegisterLand() {
             <button
               type="submit"
               className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-300"
+              disabled={loading}
             >
-              Register
+              {loading ? 'Registering...' : 'Register'}
             </button>
           </form>
+
+          {/* Success or error message */}
           {successMessage && (
             <p className="mt-4 text-green-600 text-center font-medium">{successMessage}</p>
           )}
-        </div>
+          {errorMessage && (
+            <p className="mt-4 text-red-600 text-center font-medium">{errorMessage}</p>
+          )}
         </div>
       </div>
-
-
+    </div>
   );
 }
 
