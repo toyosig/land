@@ -1,92 +1,118 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Web3 from 'web3';
+import {ABI} from '../AddressABI/ABI'; // ABI file
+import { contractAddress } from '../AddressABI/contractAddress'; // Contract address
 import Header from '../components/Header';
 
-const Signup = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
+function RegisterLand() {
+  const [account, setAccount] = useState('');
+  const [landRegistry, setLandRegistry] = useState(null);
+  const [location, setLocation] = useState('');
+  const [size, setSize] = useState('');
+  const [documentHash, setDocumentHash] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  useEffect(() => {
+    const loadBlockchainData = async () => {
+      if (window.ethereum) {
+        const web3 = new Web3(window.ethereum);
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const accounts = await web3.eth.getAccounts();
+          setAccount(accounts[0]);
 
-  const handleSubmit = (e) => {
+          const contract = new web3.eth.Contract(ABI, contractAddress);
+          setLandRegistry(contract);
+        } catch (error) {
+          console.error('User denied account access or error:', error);
+        }
+      } else if (window.web3) {
+        const web3 = new Web3(window.web3.currentProvider);
+        const accounts = await web3.eth.getAccounts();
+        setAccount(accounts[0]);
+
+        const contract = new web3.eth.Contract(ABI, contractAddress);
+        setLandRegistry(contract);
+      } else {
+        window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
+      }
+    };
+
+    loadBlockchainData();
+  }, []);
+
+  const handleRegisterLand = async (e) => {
     e.preventDefault();
-    // Implement your signup logic here
-    console.log('Sign-up form submitted:', formData);
+    if (landRegistry) {
+      try {
+        await landRegistry.methods.registerLand(location, size, documentHash).send({ from: account });
+        setSuccessMessage('Land registered successfully!');
+        setLocation('');
+        setSize('');
+        setDocumentHash('');
+      } catch (err) {
+        console.error('Error registering land:', err);
+        setSuccessMessage('Failed to register land.');
+      }
+    }
   };
 
   return (
-    <div>
-      <Header />
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl font-bold text-center text-blue-800 mb-2">Sign Up</h2>
-          <p className="text-center mb-6">
-            Create an account to register and manage land parcels with ease and security.
-          </p>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
-                Name
-              </label>
+      <div className="min-h-screen bg-gray-100 ">
+      <Header/>
+      <div className='flex items-center mt-10 justify-center'>
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
+          <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Register Land</h2>
+          <form onSubmit={handleRegisterLand} className="space-y-4">
+            <div>
+              <label className="block text-gray-600 font-medium mb-2">Location:</label>
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="border p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
                 required
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter land location"
               />
             </div>
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
-                Email
-              </label>
+            <div>
+              <label className="block text-gray-600 font-medium mb-2">Size (sqm):</label>
               <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="border p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                type="number"
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
                 required
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter land size"
               />
             </div>
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-                Password
-              </label>
+            <div>
+              <label className="block text-gray-600 font-medium mb-2">Document Hash:</label>
               <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="border p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                type="text"
+                value={documentHash}
+                onChange={(e) => setDocumentHash(e.target.value)}
                 required
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter document hash"
               />
             </div>
             <button
               type="submit"
-              className="bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-300"
             >
-              Sign Up
+              Register
             </button>
           </form>
-          <p className="mt-4 text-center text-gray-600">
-            Already have an account? <a href="/login" className="text-blue-500 hover:underline">Login</a>
-          </p>
+          {successMessage && (
+            <p className="mt-4 text-green-600 text-center font-medium">{successMessage}</p>
+          )}
+        </div>
         </div>
       </div>
-    </div>
-  );
-};
 
-export default Signup;
+
+  );
+}
+
+export default RegisterLand;

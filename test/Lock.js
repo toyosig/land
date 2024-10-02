@@ -1,126 +1,109 @@
-const {
-  time,
-  loadFixture,
-} = require("@nomicfoundation/hardhat-toolbox/network-helpers");
-const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
-describe("Lock", function () {
-  // We define a fixture to reuse the same setup in every test.
-  // We use loadFixture to run this setup once, snapshot that state,
-  // and reset Hardhat Network to that snapshot in every test.
-  async function deployOneYearLockFixture() {
-    const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-    const ONE_GWEI = 1_000_000_000;
+describe("LandRegistry", function () {
+    let LandRegistry;
+    let landRegistry;
+    let owner, addr1, addr2;
 
-    const lockedAmount = ONE_GWEI;
-    const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
-
-    // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount] = await ethers.getSigners();
-
-    const Lock = await ethers.getContractFactory("Lock");
-    const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-    return { lock, unlockTime, lockedAmount, owner, otherAccount };
-  }
-
-  describe("Deployment", function () {
-    it("Should set the right unlockTime", async function () {
-      const { lock, unlockTime } = await loadFixture(deployOneYearLockFixture);
-
-      expect(await lock.unlockTime()).to.equal(unlockTime);
+    // Deploy the contract before each test
+    beforeEach(async function () {
+        LandRegistry = await ethers.getContractFactory("LandRegistry");
+        [owner, addr1, addr2] = await ethers.getSigners();
+        landRegistry = await LandRegistry.deploy();
+        await landRegistry.deployed();
     });
 
-    it("Should set the right owner", async function () {
-      const { lock, owner } = await loadFixture(deployOneYearLockFixture);
+    describe("Land Registration", function () {
+        it("Should register a land with correct details", async function () {
+            await landRegistry.registerLand("123 Main St", 1000, "hash123");
 
-      expect(await lock.owner()).to.equal(owner.address);
+            const land = await landRegistry.lands(1);
+            expect(land.location).to.equal("123 Main St");
+            expect(land.size).to.equal(1000);
+            expect(land.owner).to.equal(owner.address);
+            expect(land.documentHash).to.equal("hash123");
+        });
+
+        it("Should revert if the location is already registered", async function () {
+            await landRegistry.registerLand("123 Main St", 1000, "hash123");
+            await expect(
+                landRegistry.registerLand("123 Main St", 2000, "hash456")
+            ).to.be.revertedWith("Land already registered");
+        });
     });
 
-    it("Should receive and store the funds to lock", async function () {
-      const { lock, lockedAmount } = await loadFixture(
-        deployOneYearLockFixture
-      );
+    describe("Land Transfer", function () {
+        beforeEach(async function () {
+            await landRegistry.registerLand("123 Main St", 1000, "hash123");
+        });
 
-      expect(await ethers.provider.getBalance(lock.target)).to.equal(
-        lockedAmount
-      );
+        it("Should transfer land ownership", async function () {
+            await landRegistry.transferLand(1, addr1.address);
+            const land = await landRegistry.lands(1);
+            expect(land.owner).to.equal(addr1.address);
+        });
+
+        it("Should revert if non-owner tries to transfer land", async function () {
+            await expect(
+                landRegistry.connect(addr1).transferLand(1, addr2.address)
+            ).to.be.revertedWith("Only the owner can transfer the land");
+        });
     });
 
-    it("Should fail if the unlockTime is not in the future", async function () {
-      // We don't use the fixture here because we want a different deployment
-      const latestTime = await time.latest();
-      const Lock = await ethers.getContractFactory("Lock");
-      await expect(Lock.deploy(latestTime, { value: 1 })).to.be.revertedWith(
-        "Unlock time should be in the future"
-      );
-    });
-  });
+    describe("Land Sale", function () {
+        beforeEach(async function () {
+            await landRegistry.registerLand("123 Main St", 1000, "hash123");
+        });
 
-  describe("Withdrawals", function () {
-    describe("Validations", function () {
-      it("Should revert with the right error if called too soon", async function () {
-        const { lock } = await loadFixture(deployOneYearLockFixture);
+        it("Should set the land for sale and update the price", async function () {
+            await landRegistry.setForSale(1, ethers.utils.parseEther("1"));
+            const land = await landRegistry.lands(1);
+            expect(land.forSale).to.equal(true);
+            expect(land.price).to.equal(ethers.utils.parseEther("1"));
+        });
 
-        await expect(lock.withdraw()).to.be.revertedWith(
-          "You can't withdraw yet"
-        );
-      });
+        it("Should revert if non-owner tries to set land for sale", async function () {
+            await expect(
+                landRegistry.connect(addr1).setForSale(1, ethers.utils.parseEther("1"))
+            ).to.be.revertedWith("Only the owner can set the land for sale");
+        });
 
-      it("Should revert with the right error if called from another account", async function () {
-        const { lock, unlockTime, otherAccount } = await loadFixture(
-          deployOneYearLockFixture
-        );
+        it("Should allow the purchase of land", async function () {
+            await landRegistry.setForSale(1, ethers.utils.parseEther("1"));
+            const tx = await landRegistry.connect(addr1).purchaseLand(1, {
+                value: ethers.utils.parseEther("1"),
+            });
+            await tx.wait();
 
-        // We can increase the time in Hardhat Network
-        await time.increaseTo(unlockTime);
+            const land = await landRegistry.lands(1);
+            expect(land.owner).to.equal(addr1.address);
+            expect(land.forSale).to.equal(false);
+        });
 
-        // We use lock.connect() to send a transaction from another account
-        await expect(lock.connect(otherAccount).withdraw()).to.be.revertedWith(
-          "You aren't the owner"
-        );
-      });
-
-      it("Shouldn't fail if the unlockTime has arrived and the owner calls it", async function () {
-        const { lock, unlockTime } = await loadFixture(
-          deployOneYearLockFixture
-        );
-
-        // Transactions are sent using the first signer by default
-        await time.increaseTo(unlockTime);
-
-        await expect(lock.withdraw()).not.to.be.reverted;
-      });
+        it("Should revert if the incorrect price is sent", async function () {
+            await landRegistry.setForSale(1, ethers.utils.parseEther("1"));
+            await expect(
+                landRegistry.connect(addr1).purchaseLand(1, {
+                    value: ethers.utils.parseEther("0.5"),
+                })
+            ).to.be.revertedWith("Incorrect price");
+        });
     });
 
-    describe("Events", function () {
-      it("Should emit an event on withdrawals", async function () {
-        const { lock, unlockTime, lockedAmount } = await loadFixture(
-          deployOneYearLockFixture
-        );
+    describe("Document Verification", function () {
+        beforeEach(async function () {
+            await landRegistry.registerLand("123 Main St", 1000, "hash123");
+        });
 
-        await time.increaseTo(unlockTime);
+        it("Should verify the document hash correctly", async function () {
+            const result = await landRegistry.verifyDocument(1, "hash123");
+            expect(result).to.equal(true);
+        });
 
-        await expect(lock.withdraw())
-          .to.emit(lock, "Withdrawal")
-          .withArgs(lockedAmount, anyValue); // We accept any value as `when` arg
-      });
+        it("Should return false for incorrect document hash", async function () {
+            const result = await landRegistry.verifyDocument(1, "wrongHash");
+            expect(result).to.equal(false);
+        });
     });
-
-    describe("Transfers", function () {
-      it("Should transfer the funds to the owner", async function () {
-        const { lock, unlockTime, lockedAmount, owner } = await loadFixture(
-          deployOneYearLockFixture
-        );
-
-        await time.increaseTo(unlockTime);
-
-        await expect(lock.withdraw()).to.changeEtherBalances(
-          [owner, lock],
-          [lockedAmount, -lockedAmount]
-        );
-      });
-    });
-  });
 });
