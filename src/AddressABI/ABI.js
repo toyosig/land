@@ -186,5 +186,5 @@ export const ABI = [
       "stateMutability": "view",
       "type": "function",
       "constant": true
-    }
+    }  
   ]

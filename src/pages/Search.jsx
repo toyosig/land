@@ -21,8 +21,6 @@ function ViewAllLands() {
 
           const contract = new web3.eth.Contract(ABI, contractAddress);
           setLandRegistry(contract);
-
-          console.log('Contract successfully loaded:', contract); // Log contract to confirm
         } catch (error) {
           console.error('User denied account access or error:', error);
           setErrorMessage('Failed to connect to Ethereum. Please try again.');
@@ -42,21 +40,23 @@ function ViewAllLands() {
     if (landRegistry) {
       try {
         const result = await landRegistry.methods.getAllLands().call();
-        console.log('Fetched lands result:', result); // Log the result to check
+        console.log('Fetched lands result:', result);
 
         if (!result || result.length === 0) {
           throw new Error('No lands returned from the contract.');
         }
 
-        setLands(result); // Directly set the fetched lands
-        console.log('All lands:', result);
+        const landsData = result.map((land) => ({
+          location: land[0],        // string
+          size: land[1].toString(),  // uint256 - convert to string for display
+          owner: land[2],           // address
+          documentHash: land[3]     // string
+        }));
+
+        setLands(landsData);
       } catch (err) {
-        console.error('Error fetching all lands:', err.message || err);
-        setErrorMessage(
-          err.message.includes('out of gas')
-            ? 'Failed to fetch lands due to gas limit. Try fetching a smaller dataset.'
-            : 'Failed to fetch lands. Please try again or check the contract.'
-        );
+        console.error('Error fetching all lands:', err); // Log the entire error object
+        setErrorMessage('Failed to fetch lands. Please try again or check the contract.');
       }
     } else {
       setErrorMessage('Land registry contract not loaded.');
