@@ -59,7 +59,6 @@
     "@types/mocha": "^10.0.8",
     "ajv": "^7.2.4",
     "chai": "^4.2.0",
-    "ethers": "^6.13.3",
     "hardhat": "^2.12.0",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.8.1",
