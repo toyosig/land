@@ -10,9 +10,11 @@ function RegisterLand() {
   const [location, setLocation] = useState('');
   const [size, setSize] = useState('');
   const [documentHash, setDocumentHash] = useState('');
+  const [uploadedDocument, setUploadedDocument] = useState(null);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [generatedHash, setGeneratedHash] = useState('');
 
   // Load blockchain data
   useEffect(() => {
@@ -38,6 +40,40 @@ function RegisterLand() {
     loadBlockchainData();
   }, []);
 
+  const handleUploadDocument = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const fileContent = reader.result;
+        // Check if the document contains the required string
+        if (fileContent.includes('occupancy')) {
+          // Generate a hash from the file content
+          const hash = await generateHash(fileContent);
+          setGeneratedHash(hash);
+          setDocumentHash(hash); // Automatically fill the hash input
+          setUploadedDocument(file); // Store the uploaded document
+          setErrorMessage('');
+        } else {
+          setErrorMessage('Uploaded document is wrong. confirm your document');
+          setDocumentHash('');
+          setUploadedDocument(null);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const generateHash = async (content) => {
+    // Generate a hash using a simple hash function (for example, SHA-256)
+    const encoder = new TextEncoder();
+    const data = encoder.encode(content);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  };
+
   const handleRegisterLand = async (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -49,6 +85,13 @@ function RegisterLand() {
       return;
     }
 
+    // Verify if the entered hash matches the generated hash
+    if (documentHash !== generatedHash) {
+      setErrorMessage('The document hash does not match the generated hash.');
+      setDocumentHash('');
+      return;
+    }
+
     if (landRegistry) {
       try {
         setLoading(true); // Start loading
@@ -57,6 +100,7 @@ function RegisterLand() {
         setLocation('');
         setSize('');
         setDocumentHash('');
+        setUploadedDocument(null); // Clear uploaded document
 
         // Clear success message after a delay
         setTimeout(() => {
@@ -98,6 +142,16 @@ function RegisterLand() {
                 required
                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Enter land size"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-600 font-medium mb-2">Upload Document:</label>
+              <input
+                type="file"
+                accept=".txt"
+                onChange={handleUploadDocument}
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
               />
             </div>
             <div>

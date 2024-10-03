@@ -11,34 +11,29 @@ function ViewAllLands() {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-        const loadBlockchainData = async () => {
-            if (window.ethereum) {
-                // Initialize Web3 with local blockchain URL
-                const web3 = new Web3('http://localhost:8545'); // Ensure this matches your local node's URL
+    const loadBlockchainData = async () => {
+      if (window.ethereum) {
+        const web3 = new Web3(window.ethereum);
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const accounts = await web3.eth.getAccounts();
+          setAccount(accounts[0]);
 
-                try {
-                    // Request account access
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    const accounts = await web3.eth.getAccounts();
-                    setAccount(accounts[0]);
+          const contract = new web3.eth.Contract(ABI, contractAddress);
+          setLandRegistry(contract);
 
-                    // Create a contract instance
-                    const contract = new web3.eth.Contract(ABI, contractAddress);
-                    setLandRegistry(contract);
+          console.log('Contract successfully loaded:', contract); // Log contract to confirm
+        } catch (error) {
+          console.error('User denied account access or error:', error);
+          setErrorMessage('Failed to connect to Ethereum. Please try again.');
+        }
+      } else {
+        window.alert('Please install MetaMask to use this feature.');
+      }
+    };
 
-                    console.log('Contract successfully loaded:', contract);
-                } catch (error) {
-                    console.error('User denied account access or error:', error);
-                    setErrorMessage('Failed to connect to Ethereum. Please try again.');
-                }
-            } else {
-                window.alert('Please install MetaMask to use this feature.');
-            }
-        };
-
-        loadBlockchainData();
-    }, []);
-
+    loadBlockchainData();
+  }, []);
 
   const fetchAllLands = async () => {
     setErrorMessage('');
