@@ -1,113 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import { ABI } from '../AddressABI/ABI'; // ABI file
-import { contractAddress } from '../AddressABI/contractAddress'; // Contract address
+import LandRegistry from '../AddressABI/LandRegistry.json'; // Import your ABI JSON file
 import Header from '../components/Header';
 
-function ViewAllLands() {
-  const [account, setAccount] = useState('');
-  const [landRegistry, setLandRegistry] = useState(null);
+function Search() {
   const [lands, setLands] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [landRegistryContract, setLandRegistryContract] = useState(null);
 
   useEffect(() => {
     const loadBlockchainData = async () => {
       if (window.ethereum) {
         const web3 = new Web3(window.ethereum);
-        try {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const accounts = await web3.eth.getAccounts();
-          setAccount(accounts[0]);
+        await window.ethereum.enable();
 
-          const contract = new web3.eth.Contract(ABI, contractAddress);
-          setLandRegistry(contract);
-        } catch (error) {
-          console.error('User denied account access or error:', error);
-          setErrorMessage('Failed to connect to Ethereum. Please try again.');
+        const networkId = await web3.eth.net.getId();
+        const networkData = LandRegistry.networks[networkId];
+        if (networkData) {
+          const contract = new web3.eth.Contract(LandRegistry.abi, networkData.address);
+          setLandRegistryContract(contract);
+          fetchLands(contract);
+        } else {
+          alert('Smart contract not deployed on this network.');
         }
       } else {
-        window.alert('Please install MetaMask to use this feature.');
+        alert('Please install MetaMask to use this app.');
       }
     };
 
     loadBlockchainData();
   }, []);
 
-  const fetchAllLands = async () => {
-    setErrorMessage('');
-    setLands([]);
-
-    if (landRegistry) {
-      try {
-        const result = await landRegistry.methods.getAllLands().call();
-        console.log('Fetched lands result:', result);
-
-        if (!result || result.length === 0) {
-          throw new Error('No lands returned from the contract.');
-        }
-
-        const landsData = result.map((land) => ({
-          location: land[0],        // string
-          size: land[1].toString(),  // uint256 - convert to string for display
-          owner: land[2],           // address
-          documentHash: land[3]     // string
-        }));
-
-        setLands(landsData);
-      } catch (err) {
-        console.error('Error fetching all lands:', err); // Log the entire error object
-        setErrorMessage('Failed to fetch lands. Please try again or check the contract.');
-      }
-    } else {
-      setErrorMessage('Land registry contract not loaded.');
+  const fetchLands = async (contract) => {
+    const landCount = await contract.methods.landCount().call();
+    const fetchedLands = [];
+    for (let i = 0; i < landCount; i++) {
+      const land = await contract.methods.lands(i).call();
+      fetchedLands.push(land);
     }
+    setLands(fetchedLands);
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header />
-      <div className="flex items-center mt-10 justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-4xl">
-          <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">View All Registered Lands</h2>
-          <button
-            onClick={fetchAllLands}
-            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-300"
-          >
-            Fetch All Lands
-          </button>
-
-          {errorMessage && (
-            <p className="mt-4 text-red-600 text-center font-medium">{errorMessage}</p>
-          )}
-
-          {lands.length > 0 && (
-            <table className="min-w-full bg-white mt-6">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 border">Land ID</th>
-                  <th className="px-4 py-2 border">Location</th>
-                  <th className="px-4 py-2 border">Size (sqm)</th>
-                  <th className="px-4 py-2 border">Owner</th>
-                  <th className="px-4 py-2 border">Document Hash</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lands.map((land, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-2 border text-center">{index}</td>
-                    <td className="px-4 py-2 border">{land.location}</td>
-                    <td className="px-4 py-2 border text-center">{land.size}</td>
-                    <td className="px-4 py-2 border">{land.owner}</td>
-                    <td className="px-4 py-2 border">{land.documentHash}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+      <Header/>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 border">Land #</th>
+              <th className="px-4 py-2 border">Location</th>
+              <th className="px-4 py-2 border">Size (sqm)</th>
+              <th className="px-4 py-2 border">Owner</th>
+              <th className="px-4 py-2 border">Document Hash</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lands.map((land, index) => (
+              <tr key={index}>
+                <td className="px-4 py-2 border text-center">{index + 1}</td>
+                <td className="px-4 py-2 border">{land.location}</td>
+                <td className="px-4 py-2 border">{land.size}</td>
+                <td className="px-4 py-2 border">{land.owner}</td>
+                <td className="px-4 py-2 border">{land.documentHash}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
-export default ViewAllLands;
+export default Search;

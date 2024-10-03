@@ -1,52 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import { ABI } from '../AddressABI/ABI'; // ABI file
-import { contractAddress } from '../AddressABI/contractAddress'; // Contract address
-import Header from '../components/Header';
+import LandRegistry from '../AddressABI/LandRegistry.json'; // Import your ABI JSON file
+import Header from '../components/Header'; // Assuming you have a Header component
 
-function RegisterLand() {
+const RegisterLand = () => {
   const [account, setAccount] = useState('');
-  const [landRegistry, setLandRegistry] = useState(null);
+  const [landRegistryContract, setLandRegistryContract] = useState(null);
   const [location, setLocation] = useState('');
   const [size, setSize] = useState('');
   const [documentHash, setDocumentHash] = useState('');
   const [uploadedDocument, setUploadedDocument] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [generatedHash, setGeneratedHash] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Load blockchain data
+  // Load Web3 and contract data
   useEffect(() => {
     const loadBlockchainData = async () => {
       if (window.ethereum) {
         const web3 = new Web3(window.ethereum);
         try {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          await window.ethereum.enable();
+
           const accounts = await web3.eth.getAccounts();
           setAccount(accounts[0]);
 
-          const contract = new web3.eth.Contract(ABI, contractAddress);
-          setLandRegistry(contract);
+          const networkId = await web3.eth.net.getId();
+          const networkData = LandRegistry.networks[networkId];
+          if (networkData) {
+            const contract = new web3.eth.Contract(LandRegistry.abi, networkData.address);
+            setLandRegistryContract(contract);
+          } else {
+            setErrorMessage('Smart contract not deployed on this network.');
+          }
         } catch (error) {
-          console.error('User denied account access or error:', error);
-          setErrorMessage('Failed to connect wallet. Please try again.');
+          console.error('Error connecting to MetaMask:', error);
+          setErrorMessage('Failed to connect to MetaMask.');
         }
       } else {
-        alert('Please install MetaMask to use this feature.');
+        alert('Please install MetaMask to use this app.');
       }
     };
 
     loadBlockchainData();
   }, []);
 
+  // Handle document upload and hash generation
   const handleUploadDocument = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = async () => {
         const fileContent = reader.result;
-        // Check if the document contains the required string
+        // Check if the document contains the word 'occupancy'
         if (fileContent.includes('occupancy')) {
           // Generate a hash from the file content
           const hash = await generateHash(fileContent);
@@ -55,7 +62,7 @@ function RegisterLand() {
           setUploadedDocument(file); // Store the uploaded document
           setErrorMessage('');
         } else {
-          setErrorMessage('Uploaded document is wrong. confirm your document');
+          setErrorMessage('Uploaded document is wrong. Please confirm your document.');
           setDocumentHash('');
           setUploadedDocument(null);
         }
@@ -64,6 +71,7 @@ function RegisterLand() {
     }
   };
 
+  // Function to generate hash from content
   const generateHash = async (content) => {
     // Generate a hash using a simple hash function (for example, SHA-256)
     const encoder = new TextEncoder();
@@ -74,6 +82,7 @@ function RegisterLand() {
     return hashHex;
   };
 
+  // Handle land registration
   const handleRegisterLand = async (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -92,15 +101,17 @@ function RegisterLand() {
       return;
     }
 
-    if (landRegistry) {
+    if (landRegistryContract) {
       try {
-        setLoading(true); // Start loading
-        await landRegistry.methods.registerLand(location, size, documentHash).send({ from: account });
+        setLoading(true);
+        await landRegistryContract.methods
+          .registerLand(location, size, documentHash)
+          .send({ from: account });
         setSuccessMessage('Land registered successfully!');
         setLocation('');
         setSize('');
         setDocumentHash('');
-        setUploadedDocument(null); // Clear uploaded document
+        setUploadedDocument(null);
 
         // Clear success message after a delay
         setTimeout(() => {
@@ -110,15 +121,15 @@ function RegisterLand() {
         console.error('Error registering land:', err);
         setErrorMessage('Failed to register land. Please try again.');
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header />
-      <div className="flex items-center mt-10 justify-center">
+      <Header /> {/* Assuming you have a Header component */}
+      <div className="flex items-center justify-center mt-10">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
           <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Register Land</h2>
           <form onSubmit={handleRegisterLand} className="space-y-4">
@@ -185,6 +196,6 @@ function RegisterLand() {
       </div>
     </div>
   );
-}
+};
 
 export default RegisterLand;
