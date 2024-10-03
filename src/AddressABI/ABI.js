@@ -48,6 +48,12 @@ export const ABI = [
         {
           "indexed": true,
           "internalType": "address",
+          "name": "oldOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
           "name": "newOwner",
           "type": "address"
         }
@@ -146,53 +152,35 @@ export const ABI = [
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_landId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "_documentHash",
-          "type": "string"
-        }
-      ],
-      "name": "verifyDocument",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
       "inputs": [],
       "name": "getAllLands",
       "outputs": [
         {
-          "internalType": "string[]",
+          "components": [
+            {
+              "internalType": "string",
+              "name": "location",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "size",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "documentHash",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct LandRegistry.Land[]",
           "name": "",
-          "type": "string[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "",
-          "type": "string[]"
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
