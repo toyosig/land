@@ -25,7 +25,7 @@ const Hero = () => {
                   View Land
                 </button>
               </Link>
-              <Link to="/view">
+              <Link to="/transfer">
                 <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                   Transfer
                 </button>

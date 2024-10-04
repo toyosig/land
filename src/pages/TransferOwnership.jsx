@@ -4,13 +4,14 @@ import LandRegistry from '../AddressABI/LandRegistry.json'; // Assuming you have
 import Header from '../components/Header'; // Assuming you have a Header component
 
 const TransferOwnership = () => {
-  const [account, setAccount] = useState('');
   const [landRegistryContract, setLandRegistryContract] = useState(null);
   const [landId, setLandId] = useState('');
+  const [lands, setLands] = useState([]);
   const [newOwner, setNewOwner] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currentAccount, setCurrentAccount] = useState('');
 
   // Load Web3 and contract data
   useEffect(() => {
@@ -20,13 +21,16 @@ const TransferOwnership = () => {
         try {
           await window.ethereum.enable();
           const accounts = await web3.eth.getAccounts();
-          setAccount(accounts[0]);
+          const account = accounts[0]; // Get the first account
+          setCurrentAccount(account); // Save the current account
 
           const networkId = await web3.eth.net.getId();
           const contractAddress = LandRegistry.networks[networkId].address; // Get contract address from JSON
           if (contractAddress) {
             const contract = new web3.eth.Contract(LandRegistry.abi, contractAddress);
             setLandRegistryContract(contract);
+            // Fetch lands after setting the contract and current account
+            await fetchLands(contract, account); 
           } else {
             setErrorMessage('Contract not deployed to the detected network.');
           }
@@ -41,6 +45,25 @@ const TransferOwnership = () => {
 
     loadBlockchainData();
   }, []);
+
+  const fetchLands = async (contract, account) => {
+    try {
+      const landCount = await contract.methods.landCount().call();
+      const fetchedLands = [];
+      for (let i = 0; i < landCount; i++) {
+        const land = await contract.methods.lands(i).call();
+        // Only add the land if the owner matches the current account
+        if (land.owner.toLowerCase() === account.toLowerCase()) {
+          fetchedLands.push(land);
+        }
+      }
+      console.log(fetchedLands); // Log filtered lands to the console
+      setLands(fetchedLands);
+    } catch (error) {
+      console.error('Error fetching lands:', error);
+      setErrorMessage('Failed to fetch lands from the blockchain.');
+    }
+  };
 
   // Handle land ownership transfer
   const handleTransferOwnership = async (e) => {
@@ -58,7 +81,7 @@ const TransferOwnership = () => {
         setLoading(true);
         await landRegistryContract.methods
           .transferLand(landId, newOwner)
-          .send({ from: account });
+          .send({ from: currentAccount });
         setSuccessMessage(`Ownership of land ID ${landId} transferred to ${newOwner}`);
         setLandId('');
         setNewOwner('');
@@ -75,9 +98,44 @@ const TransferOwnership = () => {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Land #</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size (sqm)</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document Hash</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {lands.length > 0 ? (
+              lands.map((land, index) => (
+                <tr key={index}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{index + 1}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.location}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.size.toString()}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.owner}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.documentHash}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="px-4 py-2 border text-center">
+                  {errorMessage || 'No lands found.'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       <div className="flex items-center justify-center mt-10">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
           <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Transfer Land Ownership</h2>
