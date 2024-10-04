@@ -14,7 +14,7 @@ const Hero = () => {
             <p className="mt-4 text-lg text-gray-600">
               The Land Registry is a very sensitive part of the Bureau that is saddled with the responsibility of keeping an up-to-date record of all land transactions in the State.
             </p>
-            <div className='flex flex-row justify-between mt-8'>
+            <div className='flex flex-row space-x-4 mt-8'>
               <Link to="/register">
                 <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                   Register
