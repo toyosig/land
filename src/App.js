@@ -5,7 +5,7 @@ import Search from './pages/Search';
 import RegisterLand from './pages/RegisterLand';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Homedash from './dash/Homedash';
+import TransferOwnership from './pages/TransferOwnership';
 
 const App = () => {
   return (
@@ -16,7 +16,7 @@ const App = () => {
             <Route path={'/register'} element={<RegisterLand/>} />
             <Route path={'/login'} element={<Login/>} />
             <Route path={'/register'} element={<Signup/>} />
-            <Route path={'/dash'} element={<Homedash/>} />
+            <Route path={'/transfer'} element={<TransferOwnership/>} />
 
 
           </Routes>

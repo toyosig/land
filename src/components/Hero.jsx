@@ -14,16 +14,24 @@ const Hero = () => {
             <p className="mt-4 text-lg text-gray-600">
               The Land Registry is a very sensitive part of the Bureau that is saddled with the responsibility of keeping an up-to-date record of all land transactions in the State.
             </p>
-            <Link to="/register">
-              <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                Get Started
-              </button>
-            </Link>
-            <Link to="/view">
-              <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                View
-              </button>
-            </Link>
+            <div className='flex flex-row justify-between mt-8'>
+              <Link to="/register">
+                <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Register
+                </button>
+              </Link>
+              <Link to="/view">
+                <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  View Land
+                </button>
+              </Link>
+              <Link to="/view">
+                <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Transfer
+                </button>
+              </Link>
+            </div>
+
 
           </div>
           <div className="lg:col-span-1 relative">

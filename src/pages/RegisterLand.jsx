@@ -22,17 +22,16 @@ const RegisterLand = () => {
         const web3 = new Web3(window.ethereum);
         try {
           await window.ethereum.enable();
-
           const accounts = await web3.eth.getAccounts();
           setAccount(accounts[0]);
 
           const networkId = await web3.eth.net.getId();
-          const networkData = LandRegistry.networks[networkId];
-          if (networkData) {
-            const contract = new web3.eth.Contract(LandRegistry.abi, networkData.address);
+          const contractAddress = LandRegistry.networks[networkId].address; // Get the contract address from the JSON file
+          if (contractAddress) {
+            const contract = new web3.eth.Contract(LandRegistry.abi, contractAddress);
             setLandRegistryContract(contract);
           } else {
-            setErrorMessage('Smart contract not deployed on this network.');
+            setErrorMessage('Contract not deployed to the detected network.');
           }
         } catch (error) {
           console.error('Error connecting to MetaMask:', error);
@@ -53,16 +52,20 @@ const RegisterLand = () => {
       const reader = new FileReader();
       reader.onload = async () => {
         const fileContent = reader.result;
-        // Check if the document contains the word 'occupancy'
-        if (fileContent.includes('occupancy')) {
-          // Generate a hash from the file content
-          const hash = await generateHash(fileContent);
+
+        // Check if the file contains 'occupancy' and the location is not empty
+        if (fileContent.includes('occupancy') && location) {
+          // Combine the location with the document content
+          const combinedContent = `${location}\n${fileContent}`;
+
+          // Generate hash using the combined content
+          const hash = await generateHash(combinedContent);
           setGeneratedHash(hash);
-          setDocumentHash(hash); // Automatically fill the hash input
-          setUploadedDocument(file); // Store the uploaded document
+          setDocumentHash(hash);
+          setUploadedDocument(file);
           setErrorMessage('');
         } else {
-          setErrorMessage('Uploaded document is wrong. Please confirm your document.');
+          setErrorMessage('Uploaded document is incorrect. Ensure the document contains "occupancy" and the location is filled.');
           setDocumentHash('');
           setUploadedDocument(null);
         }
@@ -71,15 +74,13 @@ const RegisterLand = () => {
     }
   };
 
-  // Function to generate hash from content
+  // Function to generate a SHA-256 hash
   const generateHash = async (content) => {
-    // Generate a hash using a simple hash function (for example, SHA-256)
     const encoder = new TextEncoder();
     const data = encoder.encode(content);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return hashHex;
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   };
 
   // Handle land registration
@@ -88,16 +89,13 @@ const RegisterLand = () => {
     setErrorMessage('');
     setSuccessMessage('');
 
-    // Input validation
     if (!location || !size || !documentHash) {
       setErrorMessage('Please fill in all fields.');
       return;
     }
 
-    // Verify if the entered hash matches the generated hash
     if (documentHash !== generatedHash) {
       setErrorMessage('The document hash does not match the generated hash.');
-      setDocumentHash('');
       return;
     }
 
@@ -113,7 +111,6 @@ const RegisterLand = () => {
         setDocumentHash('');
         setUploadedDocument(null);
 
-        // Clear success message after a delay
         setTimeout(() => {
           setSuccessMessage('');
         }, 5000);
@@ -128,7 +125,7 @@ const RegisterLand = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header /> {/* Assuming you have a Header component */}
+      <Header />
       <div className="flex items-center justify-center mt-10">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
           <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Register Land</h2>
@@ -185,7 +182,6 @@ const RegisterLand = () => {
             </button>
           </form>
 
-          {/* Success or error message */}
           {successMessage && (
             <p className="mt-4 text-green-600 text-center font-medium">{successMessage}</p>
           )}
