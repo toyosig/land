@@ -46,33 +46,33 @@ const RegisterLand = () => {
   }, []);
 
   // Handle document upload and hash generation
-  const handleUploadDocument = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const fileContent = reader.result;
+const handleUploadDocument = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const fileContent = reader.result;
 
-        // Check if the file contains 'occupancy' and the location is not empty
-        if (fileContent.includes('occupancy') && location) {
-          // Combine the location with the document content
-          const combinedContent = `${location}\n${fileContent}`;
+      // Check if the document contains both the location entered by the user and the word 'occupancy'
+      if (fileContent.includes(location) && fileContent.includes('occupancy')) {
+        // Combine the location with the document content
+        const combinedContent = `${location}\n${fileContent}`;
 
-          // Generate hash using the combined content
-          const hash = await generateHash(combinedContent);
-          setGeneratedHash(hash);
-          setDocumentHash(hash);
-          setUploadedDocument(file);
-          setErrorMessage('');
-        } else {
-          setErrorMessage('Uploaded document is incorrect. Ensure the document contains "occupancy" and the location is filled.');
-          setDocumentHash('');
-          setUploadedDocument(null);
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
+        // Generate hash using the combined content
+        const hash = await generateHash(combinedContent);
+        setGeneratedHash(hash);
+        setDocumentHash(hash);
+        setUploadedDocument(file);
+        setErrorMessage('');
+      } else {
+        setErrorMessage('The document must contain both the location and the word "occupancy".');
+        setDocumentHash('');
+        setUploadedDocument(null);
+      }
+    };
+    reader.readAsText(file);
+  }
+};
 
   // Function to generate a SHA-256 hash
   const generateHash = async (content) => {
