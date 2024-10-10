@@ -65,7 +65,7 @@ const handleUploadDocument = (e) => {
         setUploadedDocument(file);
         setErrorMessage('');
       } else {
-        setErrorMessage('The document must contain both the location and the word "occupancy".');
+        setErrorMessage('wrong/fake document');
         setDocumentHash('');
         setUploadedDocument(null);
       }
