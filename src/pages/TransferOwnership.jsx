@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import LandRegistry from '../AddressABI/LandRegistry.json'; // Assuming you have the contract ABI JSON here
 import Header from '../components/Header'; // Assuming you have a Header component
+import { contractAddress } from '../AddressABI/contractAddress'; // Import the contract address
 
 const TransferOwnership = () => {
   const [landRegistryContract, setLandRegistryContract] = useState(null);
@@ -24,16 +25,11 @@ const TransferOwnership = () => {
           const account = accounts[0]; // Get the first account
           setCurrentAccount(account); // Save the current account
 
-          const networkId = await web3.eth.net.getId();
-          const contractAddress = LandRegistry.networks[networkId].address; // Get contract address from JSON
-          if (contractAddress) {
-            const contract = new web3.eth.Contract(LandRegistry.abi, contractAddress);
-            setLandRegistryContract(contract);
-            // Fetch lands after setting the contract and current account
-            await fetchLands(contract, account); 
-          } else {
-            setErrorMessage('Contract not deployed to the detected network.');
-          }
+          // Use the imported contract address directly
+          const contract = new web3.eth.Contract(LandRegistry.abi, contractAddress);
+          setLandRegistryContract(contract);
+          // Fetch lands after setting the contract and current account
+          await fetchLands(contract, account); 
         } catch (error) {
           console.error('Error connecting to MetaMask:', error);
           setErrorMessage('Failed to connect to MetaMask.');
@@ -98,7 +94,6 @@ const TransferOwnership = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -111,7 +106,6 @@ const TransferOwnership = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size (sqm)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document Hash</th>
-
             </tr>
           </thead>
           <tbody>

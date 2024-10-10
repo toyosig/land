@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import LandRegistry from '../AddressABI/LandRegistry.json'; // Import your ABI JSON file
 import Header from '../components/Header';
+import { contractAddress } from '../AddressABI/contractAddress'; // Import contract address from the separate file
 
 function Search() {
   const [lands, setLands] = useState([]);
@@ -15,17 +16,10 @@ function Search() {
           const web3 = new Web3(window.ethereum);
           await window.ethereum.enable();
 
-          const networkId = await web3.eth.net.getId();
-          const networkData = LandRegistry.networks[networkId];
-
-          if (networkData) {
-            const contract = new web3.eth.Contract(LandRegistry.abi, networkData.address);
-            setLandRegistryContract(contract);
-            await fetchLands(contract);
-          } else {
-            setErrorMessage('Smart contract not deployed on this network.');
-            console.error('Smart contract not deployed on this network.');
-          }
+          // Directly use the imported contract address
+          const contract = new web3.eth.Contract(LandRegistry.abi, contractAddress);
+          setLandRegistryContract(contract);
+          await fetchLands(contract);
         } else {
           setErrorMessage('Please install MetaMask to use this app.');
         }

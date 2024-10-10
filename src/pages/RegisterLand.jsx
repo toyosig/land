@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import LandRegistry from '../AddressABI/LandRegistry.json'; // Import your ABI JSON file
 import Header from '../components/Header'; // Assuming you have a Header component
+import {contractAddress} from '../AddressABI/contractAddress'
 
 const RegisterLand = () => {
   const [account, setAccount] = useState('');
@@ -16,7 +17,7 @@ const RegisterLand = () => {
   const [loading, setLoading] = useState(false);
 
   // Load Web3 and contract data
-  useEffect(() => {
+    useEffect(() => {
     const loadBlockchainData = async () => {
       if (window.ethereum) {
         const web3 = new Web3(window.ethereum);
@@ -25,14 +26,9 @@ const RegisterLand = () => {
           const accounts = await web3.eth.getAccounts();
           setAccount(accounts[0]);
 
-          const networkId = await web3.eth.net.getId();
-          const contractAddress = LandRegistry.networks[networkId].address; // Get the contract address from the JSON file
-          if (contractAddress) {
-            const contract = new web3.eth.Contract(LandRegistry.abi, contractAddress);
-            setLandRegistryContract(contract);
-          } else {
-            setErrorMessage('Contract not deployed to the detected network.');
-          }
+          // Directly use the imported contract address
+          const contract = new web3.eth.Contract(LandRegistry.abi, contractAddress);
+          setLandRegistryContract(contract);
         } catch (error) {
           console.error('Error connecting to MetaMask:', error);
           setErrorMessage('Failed to connect to MetaMask.');
@@ -44,6 +40,7 @@ const RegisterLand = () => {
 
     loadBlockchainData();
   }, []);
+
 
   // Handle document upload and hash generation
 const handleUploadDocument = (e) => {
