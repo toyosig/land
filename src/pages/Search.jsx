@@ -6,6 +6,8 @@ import { contractAddress } from '../AddressABI/contractAddress'; // Import contr
 
 function Search() {
   const [lands, setLands] = useState([]);
+  const [filteredLands, setFilteredLands] = useState([]);
+  const [searchInput, setSearchInput] = useState('');
   const [landRegistryContract, setLandRegistryContract] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -15,8 +17,6 @@ function Search() {
         if (window.ethereum) {
           const web3 = new Web3(window.ethereum);
           await window.ethereum.enable();
-
-          // Directly use the imported contract address
           const contract = new web3.eth.Contract(LandRegistry.abi, contractAddress);
           setLandRegistryContract(contract);
           await fetchLands(contract);
@@ -40,43 +40,68 @@ function Search() {
         const land = await contract.methods.lands(i).call();
         fetchedLands.push(land);
       }
-      console.log(fetchedLands); // Log fetched lands to the console
+      console.log(fetchedLands);
       setLands(fetchedLands);
+      setFilteredLands(fetchedLands); // Initialize filtered lands
     } catch (error) {
       console.error('Error fetching lands:', error);
       setErrorMessage('Failed to fetch lands from the blockchain.');
     }
   };
 
+  const handleSearch = (event) => {
+    const value = event.target.value;
+    setSearchInput(value);
+
+    // Filter lands based on the owner address
+    const filtered = lands.filter(land => land.owner.toLowerCase().includes(value.toLowerCase()));
+    setFilteredLands(filtered);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
-      <div className="overflow-x-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Input */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search by Owner Address"
+            value={searchInput}
+            onChange={handleSearch}
+            className="border border-gray-300 rounded px-4 py-2 w-full"
+          />
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-300">
+            <thead>
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Land #</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size (sqm)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document Hash</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Longitude</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Latitude</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {lands.length > 0 ? (
-                lands.map((land, index) => (
+            <tbody>
+              {filteredLands.length > 0 ? (
+                filteredLands.map((land, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{index + 1}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.location}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.size.toString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.owner}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.documentHash}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.longitude}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.latitude}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                  <td colSpan="7" className="px-4 py-2 border text-center">
                     {errorMessage || 'No lands found.'}
                   </td>
                 </tr>

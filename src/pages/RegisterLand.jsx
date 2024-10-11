@@ -106,7 +106,7 @@ const RegisterLand = () => {
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (!location || !size || !documentHash) {
+    if (!location || !size || !documentHash || !latitude || !longitude) {
       setErrorMessage('Please fill in all fields.');
       return;
     }
@@ -120,13 +120,15 @@ const RegisterLand = () => {
       try {
         setLoading(true);
         await landRegistryContract.methods
-          .registerLand(location, size, documentHash)
+          .registerLand(location, size, documentHash, latitude, longitude) // Include latitude and longitude
           .send({ from: account });
         setSuccessMessage('Land registered successfully!');
         setLocation('');
         setSize('');
         setDocumentHash('');
         setUploadedDocument(null);
+        setLatitude(''); // Reset latitude
+        setLongitude(''); // Reset longitude
 
         setTimeout(() => {
           setSuccessMessage('');

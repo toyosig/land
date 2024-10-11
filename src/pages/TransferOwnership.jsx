@@ -106,6 +106,9 @@ const TransferOwnership = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size (sqm)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document Hash</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Longitude</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Latitude</th>
+
             </tr>
           </thead>
           <tbody>
@@ -117,11 +120,14 @@ const TransferOwnership = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.size.toString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.owner}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.documentHash}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.longitude}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{land.latitude}</td>
+
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="px-4 py-2 border text-center">
+                <td colSpan="7" className="px-4 py-2 border text-center">
                   {errorMessage || 'No lands found.'}
                 </td>
               </tr>
