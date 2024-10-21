@@ -17,6 +17,7 @@ const RegisterLand = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [generatingAddress, setGeneratingAddress] = useState(false); // New state for address generation loading
 
   // Load Web3 and contract data
   useEffect(() => {
@@ -44,6 +45,7 @@ const RegisterLand = () => {
 
   // Fetch the address using latitude and longitude with Nominatim API
   const generateAddressFromLatLong = async (lat, long) => {
+    setGeneratingAddress(true); // Set loading state
     try {
       console.log('Fetching address with:', lat, long); // Debugging log
       const response = await fetch(
@@ -61,6 +63,8 @@ const RegisterLand = () => {
     } catch (error) {
       setErrorMessage('Failed to fetch address');
       console.error('Error fetching address:', error);
+    } finally {
+      setGeneratingAddress(false); // Reset loading state
     }
   };
 
@@ -187,8 +191,9 @@ const RegisterLand = () => {
                 type="button"
                 onClick={handleLatLongSubmit} // Ensure button is type "button"
                 className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition duration-300"
+                disabled={generatingAddress} // Disable button during loading
               >
-                Generate Address
+                {generatingAddress ? 'Generating Address...' : 'Generate Address'} {/* Show loading text */}
               </button>
             </div>
             <div>
@@ -228,16 +233,18 @@ const RegisterLand = () => {
                 value={documentHash}
                 readOnly
                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Generated document hash"
               />
             </div>
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            {successMessage && <p className="text-green-500">{successMessage}</p>}
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-300"
+              className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-300"
+              disabled={loading}
             >
-              {loading ? 'Registering...' : 'Register Land'}
+              {loading ? 'Registering Land...' : 'Register Land'}
             </button>
-            {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
-            {successMessage && <p className="text-green-500 text-sm mt-2">{successMessage}</p>}
           </form>
         </div>
       </div>
