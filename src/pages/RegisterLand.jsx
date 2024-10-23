@@ -193,7 +193,7 @@ const RegisterLand = () => {
               <button
                 type="button"
                 onClick={handleLatLongSubmit} // Ensure button is type "button"
-                className="border-[#F7D9BC] border-2 text-[#F7D9BC] py-2 px-4 rounded hover:bg-[#fdc898]  transition duration-300"
+                className="bg-[#f2f0ee] text-gray-500 py-2 px-4 rounded hover:bg-[#fdc898]  transition duration-300"
                 disabled={generatingAddress} // Disable button during loading
               >
                 {generatingAddress ? 'Generating Address...' : 'Generate Address'} {/* Show loading text */}
