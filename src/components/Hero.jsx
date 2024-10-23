@@ -1,64 +1,41 @@
 import React from 'react';
-import city from '../asset/city.jpg';
+import house from '../asset/Gorgeous-Modern-Apartment-Design-removebg-preview.png';
 import { Link } from 'react-router-dom';
 
 const Hero = () => {
   return (
-    <div className="relative bg-gray-50 py-16 sm:py-24 lg:py-32">
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="lg:col-span-1 flex flex-col justify-center">
-            <h1 className="text-4xl font-bold text-blue-800 sm:text-5xl">
-              Welcome to Land Registry
-            </h1>
-            <p className="mt-4 text-lg text-gray-600">
-              The Land Registry is a very sensitive part of the Bureau that is saddled with the responsibility of keeping an up-to-date record of all land transactions in the State.
-            </p>
-            <div className='flex flex-row space-x-4 mt-8'>
-              <Link to="/register">
-                <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  Register
-                </button>
-              </Link>
-              <Link to="/view">
-                <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  View Land
-                </button>
-              </Link>
-              <Link to="/transfer">
-                <button className="mt-6 bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  Transfer
-                </button>
-              </Link>
-            </div>
-
-
-          </div>
-          <div className="lg:col-span-1 relative">
-            <img
-              src={city} // Replace with your image URL
-              alt="Land registry"
-              className="w-full h-auto rounded-md shadow-lg"
-            />
-            <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-b from-transparent to-blue-800 opacity-25 rounded-md"></div>
-            <div className="absolute -bottom-10 -right-10 hidden sm:w-64 sm:h-64 bg-white rounded-full border-4 border-dashed border-gray-200 overflow-hidden">
-              <img
-                src={city} // Replace with your image URL
-                alt="Circle"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="absolute -bottom-20 -left-10 hidden sm:w-32 sm:h-32 bg-white rounded-full border-4 border-dashed border-gray-200 overflow-hidden">
-              <img
-                src={city} // Replace with your image URL
-                alt="Small Circle"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
+    <main className="flex flex-col md:flex-row items-center rounded-[24px] justify-between bg-[#066D8E] text-white h-auto md:h-[560px] px-4 md:px-6 py-8">
+      {/* Text Section */}
+      <div className="w-full md:hidden mt-8 ">
+        <img
+          src={house} // Replace with the actual image URL or local path
+          alt="Modern house with pool"
+          className="w-full h-auto"
+        />
       </div>
-    </div>
+      <div className="w-full md:w-[560px]">
+        <h1 className="text-3xl md:text-4xl font-semibold leading-snug">
+          Register, View And Transfer Land
+        </h1>
+        <p className="text-gray-300 text-base mt-4 md:text-lg">
+          Simplify your real estate transactions with our seamless platform. Effortlessly register new properties, view detailed land records, and transfer ownership with just a few clicks.
+        </p>
+        <Link to={'/view'}>
+          <button className="mt-8 bg-[#F7D9BC] hover:bg-[#f8d5b4] text-[#000000] w-[200px] md:w-[250px] h-[56px] md:h-[64px] rounded-lg">
+            View Land
+          </button>
+        </Link>
+      </div>
+
+      {/* Image Section */}
+      <div className="hidden md:block md:w-1/2">
+        <img
+          src={house} // Replace with the actual image URL or local path
+          alt="Modern house with pool"
+          className="w-full h-auto"
+        />
+      </div>
+    </main>
   );
 };
 

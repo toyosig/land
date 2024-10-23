@@ -3,6 +3,7 @@ import Web3 from 'web3';
 import LandRegistry from '../AddressABI/LandRegistry.json'; // Import your ABI JSON file
 import Header from '../components/Header'; // Assuming you have a Header component
 import { contractAddress } from '../AddressABI/contractAddress';
+import Footer from '../components/Footer';
 
 const RegisterLand = () => {
   const [account, setAccount] = useState('');
@@ -158,8 +159,10 @@ const RegisterLand = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
+    <div className=" mx-[16px] md:mx-[60px]">
+      <div className='mt-[32px]'>
+        <Header />
+      </div>
       <div className="flex items-center justify-center mt-10">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
           <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Register Land</h2>
@@ -190,7 +193,7 @@ const RegisterLand = () => {
               <button
                 type="button"
                 onClick={handleLatLongSubmit} // Ensure button is type "button"
-                className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition duration-300"
+                className="border-[#F7D9BC] border-2 text-[#F7D9BC] py-2 px-4 rounded hover:bg-[#fdc898]  transition duration-300"
                 disabled={generatingAddress} // Disable button during loading
               >
                 {generatingAddress ? 'Generating Address...' : 'Generate Address'} {/* Show loading text */}
@@ -240,7 +243,7 @@ const RegisterLand = () => {
             {successMessage && <p className="text-green-500">{successMessage}</p>}
             <button
               type="submit"
-              className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-300"
+              className="bg-[#F7D9BC] text-black py-2 px-4 rounded hover:bg-[#fec086] transition duration-300"
               disabled={loading}
             >
               {loading ? 'Registering Land...' : 'Register Land'}
@@ -248,6 +251,10 @@ const RegisterLand = () => {
           </form>
         </div>
       </div>
+      <div className='mt-[32px] mb-[32px]'>
+        <Footer/>
+      </div>
+
     </div>
   );
 };

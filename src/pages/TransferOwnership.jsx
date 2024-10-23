@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import LandRegistry from '../AddressABI/LandRegistry.json'; // Assuming you have the contract ABI JSON here
 import Header from '../components/Header'; // Assuming you have a Header component
+import Footer from '../components/Footer'; // Assuming you have a Header component
+
 import { contractAddress } from '../AddressABI/contractAddress'; // Import the contract address
 
 const TransferOwnership = () => {
@@ -95,9 +97,11 @@ const TransferOwnership = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      <div className="overflow-x-auto">
+    <div className=" mx-[16px] md:mx-[60px]">
+      <div className='mt-[32px]'>
+        <Header />
+      </div>
+      <div className="overflow-x-auto rounded-[24px] mt-[32px]">
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr>
@@ -164,7 +168,7 @@ const TransferOwnership = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-300"
+              className="w-full bg-[#F7D9BC] text-black py-2 rounded hover:bg-indigo-700 transition duration-300"
               disabled={loading}
             >
               {loading ? 'Transferring...' : 'Transfer Ownership'}
@@ -179,6 +183,10 @@ const TransferOwnership = () => {
           )}
         </div>
       </div>
+      <div className='mt-[32px] mb-[32px]'>
+        <Footer/>
+      </div>
+
     </div>
   );
 };

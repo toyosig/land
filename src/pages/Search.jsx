@@ -3,6 +3,7 @@ import Web3 from 'web3';
 import LandRegistry from '../AddressABI/LandRegistry.json'; // Import your ABI JSON file
 import Header from '../components/Header';
 import { contractAddress } from '../AddressABI/contractAddress'; // Import contract address from the separate file
+import Footer from '../components/Footer';
 
 function Search() {
   const [lands, setLands] = useState([]);
@@ -59,21 +60,21 @@ function Search() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Input */}
-        <div className="mb-4">
+    <div className=" mx-[16px] md:mx-[60px]">
+      <div className='mt-[32px]'>
+        <Header />
+      </div>
+        <div className="mb-5 mt-[32px]">
           <input
             type="text"
             placeholder="Search by Owner Address"
             value={searchInput}
             onChange={handleSearch}
-            className="border border-gray-300 rounded px-4 py-2 w-full"
+            className="border border-gray-300 rounded-[24px] px-4 py-2 w-full"
           />
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-[24px]">
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr>
@@ -109,7 +110,10 @@ function Search() {
             </tbody>
           </table>
         </div>
-      </div>
+        <div className='mt-[32px] mb-[32px]'>
+          <Footer/>
+        </div>
+
     </div>
   );
 }
