@@ -6,7 +6,7 @@ const Hero = () => {
   return (
     <main className="flex flex-col md:flex-row items-center rounded-[24px] justify-between bg-[#066D8E] text-white h-auto md:h-[560px] px-4 md:px-6 py-8">
       {/* Text Section */}
-      <div className="w-full md:hidden mt-8 ">
+      <div className="w-full md:hidden mt-8 mb-8 ">
         <img
           src={house} // Replace with the actual image URL or local path
           alt="Modern house with pool"

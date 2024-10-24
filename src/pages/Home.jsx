@@ -9,10 +9,10 @@ const Home = () => {
       <div>
         <Header/>
       </div>
-      <div className='mt-[32px]'>
+      <div className='mt-[16px] md:mt-[32px]'>
         <Hero/>
       </div>
-      <div className='mt-[32px] mb-[32px]'>
+      <div className='mt-[16px] md:mt-[32px] mb-[32px]'>
         <Footer/>
       </div>
     </div>
