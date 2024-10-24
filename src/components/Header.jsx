@@ -31,7 +31,9 @@ const Header = () => {
   return (
     <header className="bg-[#066D8E] text-white py-4 px-8 rounded-[24px] flex justify-between items-center relative">
       {/* Logo */}
-      <img src={Logo} alt="logo" className="h-6" />
+      <div className='h-6 w-[120px] flex justify-center items-center'>
+        <img src={Logo} alt="logo" />
+      </div>
 
       {/* Hamburger Menu (visible on small screens) */}
       <button
